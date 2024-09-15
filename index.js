@@ -1,53 +1,107 @@
-const http = require('node:http')
-const path = require('node:path')
-const readline = require('node:readline/promises')
-const fsPromises = require('node:fs/promises')
+const express = require("express");
+const app = express();
+const {read, write} = require("./fs.service");
 
-const {foo: helperFoo} = require('./helpers/helper');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const foo = async () => {
-    //  - http -
-    // const server = http.createServer((req, res) => {
-    //     res.writeHead(200, {'Content-Type': 'application/json'});
-    //     res.end(JSON.stringify({
-    //         data: 'Hello World'
-    //     }));
-    // });
-    // server.listen(3000);
+app.get('/users', async (req, res) => {
+    try {
+        const users = await read();
+        res.send(users)
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+});
 
-//     - path -
+app.post('/users', async (req, res) => {
+    try {
+        const {name, email, password} = req.body;
+        if (!name || name.length < 3) {
+            return res.status(400).send("Name cannot be empty");
+        }
+        if (!email || !email.includes('@')) {
+            return res.status(400).send("Email cannot be empty");
+        }
+        if (!password || password.length < 6) {
+            return res.status(400).send("Password cannot be empty");
+        }
+        const users = await read();
 
-    // const pathToFile = __filename;
-    // console.log(pathToFile);
-    // console.log(path.dirname(pathToFile));
-    // console.log(path.extname(pathToFile));
-    // console.log(path.basename(pathToFile));
-    // console.log(path.parse(pathToFile));
+        const id = users.length ? users[users.length - 1]?.id + 1 : 1;
+        const newUser = {id, name, email, password};
+        users.push(newUser);
 
-//     - readline -
+        await write(users);
+        res.status(201).send(newUser);
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+});
 
-    // const rlInstance = readline.createInterface({
-    //     input: process.stdin,
-    //     output: process.stdout
-    // })
-    // const name = await rlInstance.question('Name?');
-    // console.log(`Your name is ${name}`);
-    // process.exit(0);
+app.get('/users/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+        const users = await read();
+        const user = users.find(user => user.id === userId);
+        if (!user) {
+            return res.status(404).send('User Not Found');
+        }
+        res.send(user);
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+});
 
-//     - fs -
+app.put('/users/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+        const {name, email, password} = req.body;
 
-    // const pathToFile = path.resolve(__dirname, 'foo.txt');
-    // await fsPromises.writeFile(pathToFile, 'Hello World!');
-    await fsPromises.mkdir(path.join(__dirname, 'mew-folder'), {recursive: true});
-    // await fsPromises.mkdir(path.join(__dirname, 'baseFolder'));
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder', 'folder1'), {recursive: true});
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder', 'folder2'), {recursive: true});
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder', 'folder3'), {recursive: true});
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder', 'folder4'), {recursive: true});
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder', 'folder5'), {recursive: true});
-    await fsPromises.mkdir(path.join(__dirname, 'baseFolder','folder1', 'f1-file1.txt'), {recursive: true});
-};
+        if (!name || name.length < 3) {
+            return res.status(400).send("Name cannot be empty");
+        }
+        if (!email || !email.includes('@')) {
+            return res.status(400).send("Email cannot be empty");
+        }
+        if (!password || password.length < 6) {
+            return res.status(400).send("Password cannot be empty");
+        }
+        const users = await read();
 
-void foo();
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).send('User Not Found');
+        }
+        users[userIndex].name = name;
+        users[userIndex].email = email;
+        users[userIndex].password = password;
 
+        await write(users);
+        res.status(201).send(users[userIndex]);
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+});
 
+app.delete('/users/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+        const users = await read();
+
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).send('User Not Found');
+        }
+        users.splice(userIndex, 1);
+
+        await write(users);
+        res.sendStatus(204);
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+})
+
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+})
