@@ -12,7 +12,7 @@ app.get("/users", async (req: Request, res: Response, next: NextFunction) => {
     const users = await read();
     res.send(users);
   } catch (e) {
-    res.status(500).send(e.message);
+    next(e);
   }
 });
 
@@ -20,13 +20,13 @@ app.post("/users", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password } = req.body;
     if (!name || name.length < 3) {
-      return res.status(400).send("Name cannot be empty");
+      throw new Error("Name cannot be empty");
     }
     if (!email || !email.includes("@")) {
-      return res.status(400).send("Email cannot be empty");
+      throw new Error("Email cannot be empty");
     }
     if (!password || password.length < 6) {
-      return res.status(400).send("Password cannot be empty");
+      throw new Error("Password cannot be empty");
     }
     const users = await read();
 
@@ -37,7 +37,7 @@ app.post("/users", async (req: Request, res: Response, next: NextFunction) => {
     await write(users);
     res.status(201).send(newUser);
   } catch (e) {
-    res.status(500).send(e.message);
+    next(e);
   }
 });
 
@@ -49,11 +49,11 @@ app.get(
       const users = await read();
       const user = users.find((user) => user.id === userId);
       if (!user) {
-        return res.status(404).send("User Not Found");
+        throw new Error("User Not Found");
       }
       res.send(user);
     } catch (e) {
-      res.status(500).send(e.message);
+      next(e);
     }
   },
 );
@@ -87,7 +87,7 @@ app.put(
       await write(users);
       res.status(201).send(users[userIndex]);
     } catch (e) {
-      res.status(500).send(e.message);
+      next(e);
     }
   },
 );
@@ -108,8 +108,15 @@ app.delete(
       await write(users);
       res.sendStatus(204);
     } catch (e) {
-      res.status(500).send(e.message);
+      next(e);
     }
+  },
+);
+
+app.use(
+  "*",
+  (error: Error, req: Request, res: Response, next: NextFunction) => {
+    res.status(500).send(error.message);
   },
 );
 
