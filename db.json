@@ -70,5 +70,11 @@
     "name": "Sasha",
     "email": "sasha@gmail.com",
     "password": "qwe246"
+  },
+  {
+    "id": 13,
+    "name": "Samantha",
+    "email": "sam@gmail.com",
+    "password": "qwe246"
   }
 ]
