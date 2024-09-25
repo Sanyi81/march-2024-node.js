@@ -43,6 +43,18 @@ class UserRepository {
 
     return users[userIndex];
   }
+
+  public async deleteById(userId: number): Promise<void> {
+    const users = await read();
+
+    const userIndex = users.findIndex((user) => user.id === userId);
+    if (userIndex === -1) {
+      throw new ApiError("User Not Found", 404);
+    }
+    users.splice(userIndex, 1);
+
+    await write(users);
+  }
 }
 
 export const userRepository = new UserRepository();

@@ -40,6 +40,10 @@ class UserService {
     }
     return await userRepository.updateById(userId, dto);
   }
+
+  public async deleteById(userId: number): Promise<void> {
+    return await userRepository.deleteById(userId);
+  }
 }
 
 export const userService = new UserService();
