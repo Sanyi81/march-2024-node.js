@@ -8,19 +8,11 @@ class UserService {
   }
 
   public async create(dto: Partial<IUser>): Promise<IUser> {
-    if (!dto.name || dto.name.length < 3) {
-      throw new ApiError("Name cannot be empty", 400);
-    }
-    if (!dto.email || !dto.email.includes("@")) {
-      throw new ApiError("Email cannot be empty", 400);
-    }
-    if (!dto.password || dto.password.length < 6) {
-      throw new ApiError("Password cannot be empty", 400);
-    }
+    await this.isEmailExistOrThrow(dto.email);
     return await userRepository.create(dto);
   }
 
-  public async getById(userId: number): Promise<IUser> {
+  public async getById(userId: string): Promise<IUser> {
     const user = await userRepository.getById(userId);
     if (!user) {
       throw new ApiError("User Not Found", 404);
@@ -28,21 +20,19 @@ class UserService {
     return user;
   }
 
-  public async updateById(userId: number, dto: IUser): Promise<IUser> {
-    if (!dto.name || dto.name.length < 3) {
-      throw new ApiError("Name cannot be empty", 400);
-    }
-    if (!dto.email || !dto.email.includes("@")) {
-      throw new ApiError("Email cannot be empty", 404);
-    }
-    if (!dto.password || dto.password.length < 6) {
-      throw new ApiError("Password cannot be empty", 400);
-    }
+  public async updateById(userId: string, dto: IUser): Promise<IUser> {
     return await userRepository.updateById(userId, dto);
   }
 
-  public async deleteById(userId: number): Promise<void> {
+  public async deleteById(userId: string): Promise<void> {
     return await userRepository.deleteById(userId);
+  }
+
+  private async isEmailExistOrThrow(email: string): Promise<void> {
+    const user = await userRepository.getByEmail(email);
+    if (user) {
+      throw new ApiError("Email already exists", 409);
+    }
   }
 }
 
