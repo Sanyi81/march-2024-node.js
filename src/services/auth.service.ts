@@ -25,6 +25,7 @@ class AuthService {
     await emailService.sendMail(
       "skyharts2002@gmail.com",
       EmailTypeEnum.WELCOME,
+      { name: user.name },
     );
     return { user, tokens };
   }

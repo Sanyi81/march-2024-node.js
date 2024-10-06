@@ -13,6 +13,7 @@ class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       service: "gmail",
+      from: "No reply",
       auth: {
         user: configs.SMTP_EMAIL,
         pass: configs.SMTP_PASSWORD,
@@ -22,6 +23,7 @@ class EmailService {
     const hbsOptions = {
       viewEngine: {
         extname: ".hbs",
+        defaultLayout: "main",
         partialsDir: path.join(process.cwd(), "src", "template", "partials"),
         layoutsDir: path.join(process.cwd(), "src", "template", "layouts"),
       },
@@ -32,13 +34,14 @@ class EmailService {
     this.transporter.use("compile", hbs(hbsOptions));
   }
 
-  public async sendMail(to: string, type: EmailTypeEnum): Promise<void> {
+  public async sendMail(
+    to: string,
+    type: EmailTypeEnum,
+    context: any,
+  ): Promise<void> {
     const { subject, template } = emailConstants[type];
-    const options = {
-      to,
-      subject,
-      template,
-    };
+
+    const options = { to, subject, template, context };
     await this.transporter.sendMail(options);
   }
 }
