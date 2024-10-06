@@ -23,8 +23,8 @@ class AuthService {
     await tokenRepository.create({ ...tokens, _userId: user._id });
 
     await emailService.sendMail(
-      "skyharts2002@gmail.com",
       EmailTypeEnum.WELCOME,
+      "skyharts2002@gmail.com",
       { name: user.name },
     );
     return { user, tokens };

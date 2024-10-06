@@ -1,11 +1,11 @@
-import path from "node:path";
-
 import nodemailer, { Transporter } from "nodemailer";
 import hbs from "nodemailer-express-handlebars";
+import path from "path";
 
 import { configs } from "../configs/config";
 import { emailConstants } from "../constants/email.constants";
 import { EmailTypeEnum } from "../enums/email-type.enum";
+import { EmailTypeToPayload } from "../types/email-type-to-payload.type";
 
 class EmailService {
   private transporter: Transporter;
@@ -24,8 +24,8 @@ class EmailService {
       viewEngine: {
         extname: ".hbs",
         defaultLayout: "main",
-        partialsDir: path.join(process.cwd(), "src", "template", "partials"),
         layoutsDir: path.join(process.cwd(), "src", "template", "layouts"),
+        partialsDir: path.join(process.cwd(), "src", "template", "partials"),
       },
       viewPath: path.join(process.cwd(), "src", "template", "views"),
       extName: ".hbs",
@@ -34,10 +34,10 @@ class EmailService {
     this.transporter.use("compile", hbs(hbsOptions));
   }
 
-  public async sendMail(
+  public async sendMail<T extends EmailTypeEnum>(
+    type: T,
     to: string,
-    type: EmailTypeEnum,
-    context: any,
+    context: EmailTypeToPayload[T],
   ): Promise<void> {
     const { subject, template } = emailConstants[type];
 
