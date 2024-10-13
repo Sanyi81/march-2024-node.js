@@ -24,10 +24,10 @@ class EmailService {
       viewEngine: {
         extname: ".hbs",
         defaultLayout: "main",
-        layoutsDir: path.join(process.cwd(), "src", "template", "layouts"),
-        partialsDir: path.join(process.cwd(), "src", "template", "partials"),
+        layoutsDir: path.join(process.cwd(), "src", "templates", "layouts"),
+        partialsDir: path.join(process.cwd(), "src", "templates", "partials"),
       },
-      viewPath: path.join(process.cwd(), "src", "template", "views"),
+      viewPath: path.join(process.cwd(), "src", "templates", "views"),
       extName: ".hbs",
     };
 
