@@ -107,7 +107,7 @@ class AuthService {
   public async forgotPasswordSendEmail(dto: IResetPasswordSend): Promise<void> {
     const user = await userRepository.getByEmail(dto.email);
     if (!user) {
-      throw new ApiError("User was not found", 409);
+      throw new ApiError("User was not found", 404);
     }
 
     const token = tokenService.generateActionTokens(
@@ -120,11 +120,15 @@ class AuthService {
       token,
     });
 
-    await emailService.sendMail(EmailTypeEnum.FORGOT_PASSWORD, user.email, {
-      name: user.name,
-      email: user.email,
-      actionToken: token,
-    });
+    await emailService.sendMail(
+      EmailTypeEnum.FORGOT_PASSWORD,
+      "skyharts2002@gmail.com",
+      {
+        name: user.name,
+        email: user.email,
+        actionToken: token,
+      },
+    );
   }
 
   public async forgotPasswordSet(
@@ -138,6 +142,7 @@ class AuthService {
       _userId: jwtPayload.userId,
       type: ActionTokenTypeEnum.FORGOT_PASSWORD,
     });
+    await tokenRepository.deleteManyByParams({ _userId: jwtPayload.userId });
   }
 }
 

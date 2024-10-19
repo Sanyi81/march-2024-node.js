@@ -21,7 +21,10 @@ class TokenService {
     return { accessToken, refreshToken };
   }
 
-  public verifyToken(token: string, type: TokenTypeEnum): ITokenPayload {
+  public verifyToken(
+    token: string,
+    type: TokenTypeEnum | ActionTokenTypeEnum,
+  ): ITokenPayload {
     try {
       let secret: string;
 
@@ -33,6 +36,13 @@ class TokenService {
         case TokenTypeEnum.REFRESH:
           secret = configs.JWT_REFRESH_SECRET;
           break;
+
+        case ActionTokenTypeEnum.FORGOT_PASSWORD:
+          secret = configs.ACTION_FORGOT_PASSWORD_SECRET;
+          break;
+
+        default:
+          throw new ApiError("Invalid token type", 400);
       }
       return jsonwebtoken.verify(token, secret) as ITokenPayload;
     } catch (e) {
