@@ -1,7 +1,7 @@
 import dayjs, { ManipulateType } from "dayjs";
 
 class TimeHelper {
-  public subtractByParams(value: number, unit: ManipulateType) {
+  public subtractByParams(value: number, unit: ManipulateType): Date {
     return dayjs().subtract(value, unit).toDate();
   }
 
