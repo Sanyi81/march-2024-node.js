@@ -16,8 +16,11 @@ class TokenRepository {
   async deleteManyByParams(params: Partial<IToken>): Promise<void> {
     await Token.deleteMany(params);
   }
-  async deleteBeforeDate(date: Date): Promise<void> {
-    await Token.deleteMany({ createdAt: { $lt: date } });
+  async deleteBeforeDate(date: Date): Promise<number> {
+    const { deletedCount } = await Token.deleteMany({
+      createdAt: { $lt: date },
+    });
+    return deletedCount;
   }
 }
 

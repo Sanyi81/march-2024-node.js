@@ -5,12 +5,17 @@ import { timeHelper } from "../helpers/time.helper";
 import { tokenRepository } from "../repositories/token.repository";
 
 const handler = async () => {
-  const { value, unit } = timeHelper.parseConfigString(
-    configs.JWT_REFRESH_EXPIRATION,
-  );
+  try {
+    const { value, unit } = timeHelper.parseConfigString(
+      configs.JWT_REFRESH_EXPIRATION,
+    );
 
-  const date = timeHelper.subtractByParams(value, unit);
-  await tokenRepository.deleteManyByParams(date);
+    const date = timeHelper.subtractByParams(value, unit);
+    const deletedCount = await tokenRepository.deleteBeforeDate(date);
+    console.log(`Deleted ${deletedCount} old tokens`);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const removeOldTokensCronJob = new CronJob("* * * * *", handler);
