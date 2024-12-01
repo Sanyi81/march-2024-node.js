@@ -12,10 +12,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   console.log(`${req.method} ${req.path}`);
-//   next();
-// });
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
