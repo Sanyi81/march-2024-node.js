@@ -99,13 +99,9 @@ class AuthService {
   ): Promise<void> {
     const user = await userRepository.getById(jwtPayload.userId);
     await tokenRepository.deleteOneByParams({ _id: tokenId });
-    await emailService.sendMail(
-      EmailTypeEnum.LOGOUT,
-      "skyharts2002@gmail.com",
-      {
-        name: user.name,
-      },
-    );
+    await emailService.sendMail(EmailTypeEnum.LOGOUT, user.email, {
+      name: user.name,
+    });
   }
 
   public async logoutAll(jwtPayload: ITokenPayload): Promise<void> {
@@ -132,15 +128,11 @@ class AuthService {
       token,
     });
 
-    await emailService.sendMail(
-      EmailTypeEnum.FORGOT_PASSWORD,
-      "skyharts2002@gmail.com",
-      {
-        name: user.name,
-        email: user.email,
-        actionToken: token,
-      },
-    );
+    await emailService.sendMail(EmailTypeEnum.FORGOT_PASSWORD, user.email, {
+      name: user.name,
+      email: user.email,
+      actionToken: token,
+    });
   }
 
   public async forgotPasswordSet(
